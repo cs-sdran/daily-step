@@ -1,3 +1,5 @@
+<p align="center">语言 / Language：<strong>简体中文</strong> · <a href="README.en.md">English</a></p>
+
 <div align="center">
 
 # 积跬步 · daily-step
@@ -6,7 +8,7 @@
 
 一款离线可用的每日任务打卡应用，用简洁的任务列表和热力图记录每一步。
 
-[下载 Windows 版](https://github.com/cs-sdran/daily-step/releases/latest) · [从源码运行](#从源码运行) · [English](#english)
+[下载 Windows 版](https://github.com/cs-sdran/daily-step/releases/latest) · [从源码运行](#从源码运行)
 
 <sub>本地优先 · 无账号 · 无后端 · 中英文界面</sub>
 
@@ -101,18 +103,9 @@ python3 -m venv .venv
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
-└── README.md
+├── README.md             # 简体中文
+└── README.en.md          # English
 ~~~
-
-## English
-
-**daily-step** is an offline daily task tracker with a clean interface, read-only history, and a 183-day contribution heatmap. Switch between Chinese and English from the top-right button; the app remembers your preference.
-
-- **Windows:** download [the latest release](https://github.com/cs-sdran/daily-step/releases/latest) and open **daily-step-Windows.exe**.
-- **Browser:** download the repository and open [src/index.html](src/index.html).
-- **Source:** install Python 3.10+, then follow [the commands above](#从源码运行).
-- **macOS:** build from source with <code>bash build_scripts/build_macos.sh</code>.
-- **Data:** tasks stay in localStorage on your device. Browser and desktop storage are separate.
 
 ## License
 
