@@ -16,7 +16,7 @@ def main():
     profile = Path.home() / ".small_steps" / "webview"
     profile.mkdir(parents=True, exist_ok=True)
     webview.create_window(
-        "积跬步 · JiKuiBu",
+        "积跬步 · daily-step",
         str(html_file),
         width=1180,
         height=820,

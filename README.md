@@ -1,120 +1,119 @@
-# 积跬步 · JiKuiBu
+<div align="center">
 
-> 不积跬步，无以至千里。一款极简的每日任务打卡与热力图追踪桌面应用。
+# 积跬步 · daily-step
 
-界面由原生 HTML、CSS 和 JavaScript 编写，桌面窗口由 Python 和 pywebview 提供。运行时无需账号、后端或网络连接。
+**不积跬步，无以至千里。**
 
-## 功能特色
+一款离线可用的每日任务打卡应用，用简洁的任务列表和热力图记录每一步。
 
-- **今日任务**：添加、完成、取消完成和删除任务，实时显示完成进度。
-- **历史记录**：点击热力图日期，查看当天任务和完成情况。
-- **GitHub 风格热力图**：直观回顾最近约六个月的打卡情况。
-- **本地保存**：任务按日期写入 localStorage，键名为 `tasks_YYYY-MM-DD`。
-- **中英文切换**：自动匹配浏览器语言，也可在页面右上角手动切换；偏好保存在 `app_lang`。
+[下载 Windows 版](https://github.com/cs-sdran/daily-step/releases/latest) · [从源码运行](#从源码运行) · [English](#english)
 
-## 项目结构
+<sub>本地优先 · 无账号 · 无后端 · 中英文界面</sub>
 
-```text
-积跬步/
-├── src/
-│   ├── main.py             # pywebview 桌面启动器
-│   ├── index.html          # 完整界面、样式和交互
-│   └── app.ico             # Windows 图标
-├── build_scripts/
-│   ├── build_windows.bat
-│   └── build_macos.sh
-├── .gitignore
-├── requirements.txt
-├── LICENSE
-└── README.md
-```
+</div>
+
+## 界面预览
+
+![积跬步中文界面：今日任务、完成进度、热力图与历史记录](docs/screenshots/zh.png)
+
+<details>
+<summary>查看 English 界面</summary>
+<br>
+<img src="docs/screenshots/en.png" alt="daily-step English interface with tasks, progress, heatmap and history">
+</details>
+
+<sub>截图使用演示任务，不包含真实用户数据。</sub>
+
+## 功能
+
+| | |
+| --- | --- |
+| **今日任务** | 添加、完成、取消完成和删除任务，进度即时更新。 |
+| **历史回顾** | 点击热力图中的日期，查看当天任务及完成情况。 |
+| **打卡热力图** | 用最近 183 天的颜色方块回看自己的进展。 |
+| **中英切换** | 自动识别浏览器语言，也可随时手动切换并记住选择。 |
+| **离线保存** | 数据留在本机，无需注册账号、连接服务器或使用数据库。 |
+
+## 快速开始
+
+### 下载 Windows 桌面版
+
+前往 [最新 Release](https://github.com/cs-sdran/daily-step/releases/latest)，下载 **daily-step-Windows.exe** 后双击打开。可以把文件放到桌面，或为它创建桌面快捷方式。
+
+### 直接在浏览器中使用
+
+下载本仓库后，双击 [src/index.html](src/index.html) 即可。浏览器版与桌面版使用各自独立的本地存储。
 
 ## 从源码运行
 
-需要 Python 3.10+。在项目根目录执行：
+需要 **Python 3.10+**。桌面窗口由 pywebview 提供；界面采用原生 HTML、CSS 与 JavaScript。
 
-### Windows
+**Windows（PowerShell）**
 
-```powershell
+~~~powershell
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe src\main.py
-```
+~~~
 
-### macOS
+**macOS**
 
-```bash
+~~~bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python src/main.py
-```
+~~~
 
-也可以直接双击 `src/index.html` 在浏览器中使用；浏览器和桌面版拥有各自独立的 localStorage 数据。
+## 自行打包
 
-## 打包桌面应用
+打包脚本会自动创建虚拟环境、安装依赖并运行 PyInstaller。首次安装依赖需要联网；生成的应用可离线运行。
 
-打包必须在目标系统上进行；Windows 上生成 `.exe`，macOS 上生成 `.app`。首次打包需要联网安装 Python 依赖，打包后的应用离线可用。
+| 平台 | 命令 | 输出 |
+| --- | --- | --- |
+| Windows | <code>build_scripts\build_windows.bat</code> | <code>dist\积跬步.exe</code> |
+| macOS | <code>bash build_scripts/build_macos.sh</code> | <code>dist/积跬步.app</code> |
 
-### Windows
+请在对应操作系统上打包。当前 Release 提供 Windows 可执行文件；macOS 用户可按上面的脚本从源码构建。
 
-在项目根目录运行：
+## 数据与隐私
 
-```bat
-build_scripts\build_windows.bat
-```
+任务按本地日期保存，键名为 <code>tasks_YYYY-MM-DD</code>；语言偏好保存为 <code>app_lang</code>。当前版本使用 **localStorage**，不生成 <code>tasks.json</code>。
 
-脚本自动创建 `.venv`、安装 `requirements.txt` 并运行 PyInstaller。生成文件是 `dist\积跬步.exe`。可以把 exe 复制到桌面，或为它创建桌面快捷方式。
+桌面版的 WebView 数据目录：
 
-等价的手动打包命令：
+- Windows：<code>%USERPROFILE%\.small_steps\webview</code>
+- macOS：<code>~/.small_steps/webview</code>
 
-```powershell
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name "积跬步" --icon "src\app.ico" --add-data "src\index.html:." "src\main.py"
-```
+浏览器直接打开 HTML 时，任务保存在该浏览器自己的站点存储中，与桌面版不共享。卸载或清理浏览器数据前，请留意其中的任务记录。
 
-### macOS
+## 项目结构
 
-在项目根目录运行：
+~~~text
+积跬步/
+├── src/
+│   ├── index.html          # 页面、样式与交互
+│   ├── main.py             # pywebview 桌面启动器
+│   └── app.ico             # Windows 图标
+├── docs/screenshots/       # README 界面截图
+├── build_scripts/
+│   ├── build_windows.bat
+│   └── build_macos.sh
+├── requirements.txt
+├── .gitignore
+├── LICENSE
+└── README.md
+~~~
 
-```bash
-bash build_scripts/build_macos.sh
-```
+## English
 
-脚本自动创建 `.venv`、安装依赖并运行 PyInstaller。生成文件是 `dist/积跬步.app`。把 `.app` 拖到“应用程序”文件夹，或放到桌面，即可双击打开。
+**daily-step** is an offline daily task tracker with a clean interface, read-only history, and a 183-day contribution heatmap. Switch between Chinese and English from the top-right button; the app remembers your preference.
 
-等价的手动打包命令：
+- **Windows:** download [the latest release](https://github.com/cs-sdran/daily-step/releases/latest) and open **daily-step-Windows.exe**.
+- **Browser:** download the repository and open [src/index.html](src/index.html).
+- **Source:** install Python 3.10+, then follow [the commands above](#从源码运行).
+- **macOS:** build from source with <code>bash build_scripts/build_macos.sh</code>.
+- **Data:** tasks stay in localStorage on your device. Browser and desktop storage are separate.
 
-```bash
-.venv/bin/python -m PyInstaller --noconfirm --clean --onefile --windowed --name "积跬步" --add-data "src/index.html:." src/main.py
-```
+## License
 
-## 数据保存位置
-
-当前版本使用 **localStorage**，没有生成 `tasks.json`。桌面版的 WebView 用户数据保存在：
-
-- Windows：`%USERPROFILE%\.small_steps\webview`
-- macOS：`~/.small_steps/webview`
-
-数据目录位于用户主目录，不在 exe、`.app` 或 PyInstaller 的临时解压目录中。不要在未备份数据时删除它。直接用浏览器打开 HTML 时，数据保存在该浏览器自己的站点存储中，与桌面版不共享。
-
-## 发布版本
-
-仓库只提交源码和构建脚本。`dist/`、`.exe` 和 `.app` 已由 `.gitignore` 排除。发布时在 GitHub 仓库的 **Releases → Draft a new release** 创建版本标签（例如 `v1.0.0`），上传 `dist/积跬步.exe`；macOS 版建议先将 `.app` 压缩为 ZIP 再上传。填写版本说明后发布，用户从 Releases 下载程序。
-
-## 首次上传到 GitHub
-
-先在 GitHub 创建一个空仓库，再在本项目根目录执行。将示例地址换成你的仓库地址：
-
-```bash
-git init
-git add .
-git commit -m "Initial release"
-git branch -M main
-git remote add origin https://github.com/你的用户名/你的仓库名.git
-git push -u origin main
-```
-
-推送前可用 `git status` 检查待提交文件，确认 `.venv/`、`build/` 和 `dist/` 没有进入暂存区。
-
-## 开源协议
-
-本项目采用 [MIT License](LICENSE)。
+Released under the [MIT License](LICENSE). Issues and pull requests are welcome.

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>积跬步 · JiKuiBu</title>
+  <title>积跬步 · daily-step</title>
   <style>
     /* 视觉基础：低对比背景、清晰字阶和柔和卡片。 */
     :root {
@@ -337,7 +337,7 @@
           languageSwitch: "切换到英文"
         },
         en: {
-          title: "JiKuiBu", brandCaption: "SMALL STEPS, EVERY DAY", freshStart: "A FRESH START, EVERY DAY",
+          title: "daily-step", brandCaption: "SMALL STEPS, EVERY DAY", freshStart: "A FRESH START, EVERY DAY",
           subtitle: "A journey of a thousand miles begins with a single step.",
           inputPlaceholder: "Add today's must-do task...", inputAria: "New task name", add: "Add",
           progressLabel: "TODAY'S PROGRESS", heatTitle: "Your journey",
@@ -393,7 +393,7 @@
           try { localStorage.setItem("app_lang", lang); } catch (error) { showToast(t("saveError")); }
         }
         document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
-        document.title = lang === "zh" ? "积跬步 · JiKuiBu" : "JiKuiBu";
+        document.title = lang === "zh" ? "积跬步 · daily-step" : "daily-step";
         document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
         document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
         document.querySelectorAll("[data-i18n-aria]").forEach((node) => { node.setAttribute("aria-label", t(node.dataset.i18nAria)); });
