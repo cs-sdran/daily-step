@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>积跬步 · JiKuiBu</title>
+  <style>
+    /* 视觉基础：低对比背景、清晰字阶和柔和卡片。 */
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --ink: #202839;
+      --muted: #8992a3;
+      --line: #edf0f5;
+      --blue: #4f7cff;
+      --blue-deep: #3566f5;
+      --green-0: #ebedf0;
+      --green-1: #9be9a8;
+      --green-2: #40c463;
+      --green-3: #216e39;
+      --shadow: 0 4px 12px rgba(0, 0, 0, .05), 0 18px 48px rgba(40, 52, 83, .035);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(79,124,255,.27); outline-offset: 3px; }
+    .app { width: min(1140px, calc(100% - 48px)); margin: 0 auto; padding: 34px 0 58px; }
+
+    .topbar, .brand, .date-chip, .section-head, .section-title, .task-row, .task-main,
+    .legend, .heat-layout, .panel-heading, .detail-head { display: flex; align-items: center; }
+    .topbar { justify-content: space-between; margin-bottom: 29px; }
+    .brand { gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
+      background: linear-gradient(145deg, #7599ff, #4f7cff 68%, #3867f4);
+      box-shadow: 0 8px 18px rgba(79,124,255,.22);
+    }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-name { font-size: 15px; font-weight: 760; letter-spacing: -.02em; }
+    .brand-caption { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; letter-spacing: .06em; }
+    .date-chip {
+      gap: 8px; padding: 10px 14px; border: 1px solid #e9edf3; border-radius: 999px;
+      background: #fff; color: #697588; font-size: 13px; font-weight: 600; white-space: nowrap;
+    }
+    .date-chip svg { width: 15px; height: 15px; color: var(--blue); }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .lang-switch {
+      min-height: 38px; padding: 0 12px; border: 1px solid #e9edf3; border-radius: 999px;
+      background: #fff; color: #52627c; font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: border-color .18s, color .18s, transform .18s;
+    }
+    .lang-switch:hover { border-color: #b8c9ff; color: var(--blue-deep); transform: translateY(-1px); }
+
+    .card {
+      background: var(--surface); border: 1px solid rgba(231,235,243,.83);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .hero {
+      position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0,1fr) 246px;
+      gap: 42px; padding: 35px 38px 33px;
+    }
+    .hero::after {
+      content: ""; position: absolute; right: 155px; top: -150px; width: 420px; height: 420px;
+      border-radius: 50%; background: radial-gradient(circle, rgba(79,124,255,.065), transparent 67%);
+      pointer-events: none;
+    }
+    .hero-copy, .progress-side { position: relative; z-index: 1; }
+    .eyebrow { color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+    h1 { margin: 11px 0 8px; font-size: clamp(32px, 4vw, 43px); line-height: 1.18; letter-spacing: -.055em; font-weight: 780; }
+    .hero-subtitle { margin: 0; color: #7b8595; font-size: 14px; line-height: 1.8; }
+    .form { display: flex; gap: 11px; margin-top: 29px; }
+    .input-shell {
+      display: flex; align-items: center; gap: 11px; min-width: 0; flex: 1; height: 50px;
+      padding: 0 16px; border: 1px solid transparent; border-radius: 13px; background: #f5f7fa;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input-shell:focus-within { background: #fff; border-color: #a9bfff; box-shadow: 0 0 0 4px rgba(79,124,255,.12); }
+    .input-shell svg { width: 18px; height: 18px; color: #a1aabb; flex: none; }
+    .task-input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; }
+    .task-input::placeholder { color: #a5adba; }
+    .primary-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      border: 0; border-radius: 12px; padding: 0 21px; min-height: 50px;
+      background: linear-gradient(135deg, #6b91ff, #4f7cff 55%, #3d69ef);
+      color: white; font-size: 13px; font-weight: 750; cursor: pointer; white-space: nowrap;
+      box-shadow: 0 9px 18px rgba(79,124,255,.23);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .primary-btn:hover { transform: translateY(-2px); filter: brightness(.96); box-shadow: 0 12px 22px rgba(79,124,255,.28); }
+    .primary-btn:active { transform: translateY(0); }
+    .primary-btn svg { width: 16px; height: 16px; }
+    .progress-side {
+      display: flex; align-items: center; gap: 16px; align-self: stretch;
+      padding: 20px; border-radius: 16px; background: #f7f9ff; border: 1px solid #ecf1ff;
+    }
+    .progress-ring {
+      --progress: 0%; width: 78px; height: 78px; flex: none; border-radius: 50%;
+      background: conic-gradient(var(--blue) var(--progress), #e4eafb 0);
+      display: grid; place-items: center;
+    }
+    .progress-ring::before {
+      content: attr(data-value); display: grid; place-items: center; width: 63px; height: 63px;
+      border-radius: 50%; background: #f7f9ff; color: var(--ink); font-size: 19px; font-weight: 780;
+    }
+    .progress-label { color: #8b97ac; font-size: 11px; font-weight: 700; letter-spacing: .11em; }
+    .progress-number { display: block; margin-top: 5px; font-size: 19px; font-weight: 780; letter-spacing: -.04em; white-space: nowrap; }
+    .progress-note { display: block; margin-top: 5px; color: #8d97a8; font-size: 11px; white-space: nowrap; }
+
+    .heat-card { margin-top: 22px; padding: 26px 30px 23px; }
+    .section-head { justify-content: space-between; gap: 16px; }
+    .section-title { gap: 10px; min-width: 0; }
+    .section-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: #eaf8ef; color: #3baa62; flex: none; }
+    .section-icon svg { width: 18px; height: 18px; }
+    h2 { margin: 0; font-size: 16px; line-height: 1.4; letter-spacing: -.02em; }
+    .section-description { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .heat-badge { padding: 8px 11px; border-radius: 9px; background: #f5f7fa; color: #8b95a5; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .heat-scroll { overflow-x: auto; overflow-y: hidden; padding: 22px 0 4px; scrollbar-color: #dce2eb transparent; scrollbar-width: thin; }
+    .heat-layout { align-items: flex-end; width: max-content; gap: 14px; min-width: 100%; }
+    .weekday-labels { display: grid; grid-template-rows: repeat(7, 13px); row-gap: 5px; width: 24px; flex: none; color: #a6afbd; font-size: 10px; line-height: 13px; }
+    .heat-content { width: max-content; }
+    .months { position: relative; height: 18px; margin-bottom: 9px; color: #98a2b0; font-size: 10px; font-weight: 600; }
+    .month-label { position: absolute; top: 0; white-space: nowrap; }
+    .heat-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); grid-auto-columns: 13px; gap: 5px; }
+    .heat-day, .heat-blank { width: 13px; height: 13px; border-radius: 4px; }
+    .heat-day {
+      display: block; padding: 0; border: 0; cursor: pointer; background: var(--green-0);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .heat-day:hover, .heat-day:focus-visible { position: relative; z-index: 2; transform: scale(1.32); box-shadow: 0 2px 7px rgba(31,44,61,.18); outline: 0; }
+    .heat-day.selected { box-shadow: 0 0 0 2px white, 0 0 0 4px var(--blue); }
+    .heat-footer { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 20px; }
+    .heat-hint { color: #a0a9b7; font-size: 11px; }
+    .legend { gap: 6px; color: #a0a9b7; font-size: 11px; white-space: nowrap; }
+    .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+    .tooltip {
+      position: fixed; z-index: 50; display: none; pointer-events: none; transform: translate(12px, 12px);
+      padding: 8px 11px; border-radius: 9px; background: #263145; color: white;
+      box-shadow: 0 8px 22px rgba(22,31,47,.2); font-size: 11px; white-space: nowrap;
+    }
+
+    .content-grid { display: grid; grid-template-columns: minmax(0,1.45fr) minmax(280px,1fr); gap: 22px; margin-top: 22px; align-items: start; }
+    .panel { padding: 27px 29px; min-height: 330px; }
+    .panel-heading { justify-content: space-between; gap: 12px; margin-bottom: 21px; }
+    .panel-kicker { display: block; margin-bottom: 5px; color: var(--blue); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+    .count-pill { padding: 7px 10px; border-radius: 999px; background: #f1f4fa; color: #8e99a9; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .text-btn { border: 0; padding: 6px 0; background: transparent; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .text-btn:hover { color: var(--blue-deep); }
+    .text-btn:disabled { color: #bec5d1; cursor: default; }
+    .task-list { display: grid; gap: 9px; }
+    .task-row {
+      justify-content: space-between; gap: 12px; min-height: 61px; padding: 12px 15px;
+      border: 1px solid #eef1f5; border-radius: 13px; background: #fcfdff;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .task-row:hover { background: white; border-color: #dce5fb; transform: translateY(-1px); }
+    .task-row.entering { animation: slideIn .28s ease both; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .task-main { gap: 12px; min-width: 0; flex: 1; }
+    .check-circle {
+      width: 23px; height: 23px; flex: none; display: grid; place-items: center;
+      border: 1.8px solid #c8d0de; border-radius: 50%; background: white; cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+    .check-circle:hover { border-color: var(--blue); transform: scale(1.07); }
+    .check-circle svg { width: 13px; height: 13px; opacity: 0; transform: scale(.6); transition: opacity .17s, transform .17s; }
+    .task-row.done .check-circle { border-color: var(--blue); background: var(--blue); }
+    .task-row.done .check-circle svg { opacity: 1; transform: scale(1); }
+    .task-text { min-width: 0; overflow-wrap: anywhere; color: #334054; font-size: 14px; line-height: 1.55; font-weight: 560; }
+    .task-row.done .task-text { color: #aab3c1; text-decoration: line-through; }
+    .delete-btn {
+      width: 30px; height: 30px; flex: none; display: grid; place-items: center;
+      border: 0; border-radius: 8px; background: transparent; color: #b5bdc9; cursor: pointer;
+      opacity: .55; transition: color .18s, background .18s, opacity .18s;
+    }
+    .task-row:hover .delete-btn, .delete-btn:focus-visible { opacity: 1; }
+    .delete-btn:hover { background: #fff0f1; color: #e46570; }
+    .delete-btn svg { width: 16px; height: 16px; }
+    .empty { display: grid; place-items: center; text-align: center; padding: 27px 12px 30px; }
+    .empty svg { width: 145px; height: 126px; }
+    .empty-title { margin-top: 11px; font-size: 14px; font-weight: 740; }
+    .empty-copy { margin-top: 6px; color: #9ca6b5; font-size: 12px; line-height: 1.6; }
+
+    .detail-head { justify-content: space-between; gap: 10px; }
+    .detail-date { margin: 5px 0 0; color: #6f7c90; font-size: 12px; }
+    .detail-placeholder { display: grid; place-items: center; min-height: 192px; text-align: center; color: #a4adbb; }
+    .detail-placeholder svg { width: 42px; height: 42px; margin-bottom: 10px; color: #c6d3f1; }
+    .detail-placeholder p { margin: 0; font-size: 12px; line-height: 1.75; }
+    .detail-summary { margin: 18px 0 12px; color: #8b96a6; font-size: 12px; }
+    .history-list { display: grid; gap: 8px; max-height: 350px; overflow-y: auto; }
+    .history-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: #f8f9fc; border-radius: 10px; color: #526072; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+    .history-item.done { color: #a8b1bf; text-decoration: line-through; }
+    .history-status { flex: none; width: 15px; color: var(--blue); font-weight: 800; text-decoration: none; }
+    .footer { margin-top: 28px; text-align: center; color: #b0b8c4; font-size: 11px; letter-spacing: .02em; }
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 60; max-width: min(360px, calc(100vw - 48px)); padding: 12px 16px; border-radius: 11px; background: #273247; color: white; box-shadow: 0 12px 25px rgba(22,31,47,.18); font-size: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 880px) {
+      .hero { grid-template-columns: 1fr; gap: 23px; }
+      .progress-side { justify-self: start; padding: 14px 18px; }
+      .content-grid { grid-template-columns: 1fr; }
+      .panel { min-height: auto; }
+    }
+    @media (max-width: 560px) {
+      .app { width: min(100% - 28px, 1140px); padding-top: 19px; }
+      .topbar { margin-bottom: 17px; }
+      .date-chip { font-size: 11px; padding: 9px; }
+      .date-chip svg { display: none; }
+      .top-actions { gap: 6px; }
+      .lang-switch { padding: 0 9px; font-size: 11px; }
+      .hero { padding: 26px 21px; }
+      .hero-subtitle { font-size: 12px; }
+      .form { gap: 8px; }
+      .primary-btn { padding: 0 14px; }
+      .heat-card, .panel { padding: 23px 20px; }
+      .heat-badge { display: none; }
+      .heat-footer { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4.1 4.1L19 6.6" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><div class="brand-name" data-i18n="title">积跬步</div><span class="brand-caption" data-i18n="brandCaption">日日精进</span></div>
+      </div>
+      <div class="top-actions">
+        <div class="date-chip">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M7 3v4M17 3v4M3 10h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span id="dateChip"></span>
+        </div>
+        <button id="languageSwitch" class="lang-switch" type="button" aria-label="切换语言">🌐 English</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero card" aria-labelledby="pageTitle">
+        <div class="hero-copy">
+          <div class="eyebrow" data-i18n="freshStart">每一天，重新出发</div>
+          <h1 id="pageTitle"><span data-i18n="title">积跬步</span><span style="color:#4f7cff">.</span></h1>
+          <p class="hero-subtitle" data-i18n="subtitle">不积跬步，无以至千里。</p>
+          <form id="taskForm" class="form" autocomplete="off">
+            <label class="input-shell">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input id="taskInput" class="task-input" type="text" maxlength="200" placeholder="添加今天必须完成的任务..." aria-label="新任务名称" data-i18n-placeholder="inputPlaceholder" data-i18n-aria="inputAria">
+            </label>
+            <button class="primary-btn" type="submit">
+              <span data-i18n="add">添加</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+        </div>
+        <div class="progress-side" aria-live="polite">
+          <div id="progressRing" class="progress-ring" data-value="0%"></div>
+          <div><span class="progress-label" data-i18n="progressLabel">今日进度</span><strong id="progressCount" class="progress-number">0 / 0</strong><span id="progressNote" class="progress-note">从第一件事开始</span></div>
+        </div>
+      </section>
+
+      <section class="heat-card card" aria-labelledby="heatTitle">
+        <div class="section-head">
+          <div class="section-title">
+            <span class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17.5 9 12l3 2.8L20 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6.5h3v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><h2 id="heatTitle" data-i18n="heatTitle">坚持的痕迹</h2><p class="section-description" data-i18n="heatDescription">每一个方块，都是认真生活的一天</p></div>
+          </div>
+          <span class="heat-badge" data-i18n="heatBadge">最近 183 天</span>
+        </div>
+        <div id="heatScroll" class="heat-scroll">
+          <div class="heat-layout">
+            <div class="weekday-labels" aria-hidden="true"><span data-i18n="monday">周一</span><span></span><span data-i18n="wednesday">周三</span><span></span><span data-i18n="friday">周五</span><span></span><span></span></div>
+            <div class="heat-content"><div id="monthLabels" class="months"></div><div id="heatGrid" class="heat-grid" aria-label="最近 183 天任务完成热力图" data-i18n-aria="heatGridAria"></div></div>
+          </div>
+        </div>
+        <div class="heat-footer"><span class="heat-hint" data-i18n="heatHint">悬停查看进度 · 点击查看当天任务</span><div class="legend"><span data-i18n="less">少</span><i style="background:#ebedf0"></i><i style="background:#9be9a8"></i><i style="background:#40c463"></i><i style="background:#216e39"></i><span data-i18n="more">多</span></div></div>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel card" aria-labelledby="todayTitle">
+          <div class="panel-heading"><div><span class="panel-kicker" data-i18n="todayKicker">专注今天</span><h2 id="todayTitle" data-i18n="todayTitle">今日任务</h2></div><div style="display:flex;align-items:center;gap:15px"><button id="clearDone" class="text-btn" type="button" data-i18n="clear">清除已完成</button><span id="taskCount" class="count-pill">0 项任务</span></div></div>
+          <div id="taskList" class="task-list" aria-live="polite"></div>
+        </section>
+        <aside id="detailPanel" class="panel card" aria-labelledby="detailTitle">
+          <div class="detail-head"><div><span class="panel-kicker" data-i18n="historyKicker">回顾过往</span><h2 id="detailTitle">历史任务</h2></div><span id="detailCount" class="count-pill" hidden></span></div>
+          <div id="detailContent"></div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer" data-i18n="footer">让每一天，都有一点点确定的进展。</footer>
+  </div>
+  <div id="tooltip" class="tooltip" role="tooltip"></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const DAY_MS = 86400000;
+      const HEAT_DAYS = 183;
+      const COLORS = { empty: "#EBEDF0", low: "#9BE9A8", medium: "#40C463", high: "#216E39" };
+      // 翻译字典集中管理静态文字和动态提示；任务本身始终保留用户输入的原文。
+      const translations = {
+        zh: {
+          title: "积跬步", brandCaption: "日日精进", freshStart: "每一天，重新出发",
+          subtitle: "不积跬步，无以至千里。", inputPlaceholder: "添加今天必须完成的任务...",
+          inputAria: "新任务名称", add: "添加", progressLabel: "今日进度",
+          heatTitle: "坚持的痕迹", heatDescription: "每一个方块，都是认真生活的一天",
+          heatBadge: "最近 183 天", heatGridAria: "最近 183 天任务完成热力图",
+          monday: "周一", wednesday: "周三", friday: "周五",
+          heatHint: "悬停查看进度 · 点击查看当天任务", less: "少", more: "多",
+          todayKicker: "专注今天", todayTitle: "今日任务", clear: "清除已完成",
+          historyKicker: "回顾过往", historyTitle: "历史任务", selectedTitle: "当天的任务",
+          footer: "让每一天，都有一点点确定的进展。",
+          progressStart: "从第一件事开始", progressAll: "今天的任务都完成了",
+          progressRemaining: "还有 {count} 件，继续加油", taskCount: "{count} 项任务",
+          emptyToday: "今天还没有任务，跨出你的第一跬步吧。",
+          toggleOn: "完成任务：{text}", toggleOff: "取消完成：{text}", deleteTask: "删除任务：{text}",
+          tooltip: "{date} 完成 {done}/{total}", detailPlaceholder: "点击上方热力图的日期|在这里回看那一天",
+          detailCount: "{done}/{total} 已完成", detailEmpty: "这一天没有记录任务。|空白的一天，也可以重新开始。",
+          detailSummary: "当天完成 {done} 项，共 {total} 项任务",
+          loadError: "{date} 的任务读取失败，请检查浏览器存储。",
+          saveError: "保存失败：浏览器可能禁止了本地存储。",
+          languageSwitch: "切换到英文"
+        },
+        en: {
+          title: "JiKuiBu", brandCaption: "SMALL STEPS, EVERY DAY", freshStart: "A FRESH START, EVERY DAY",
+          subtitle: "A journey of a thousand miles begins with a single step.",
+          inputPlaceholder: "Add today's must-do task...", inputAria: "New task name", add: "Add",
+          progressLabel: "TODAY'S PROGRESS", heatTitle: "Your journey",
+          heatDescription: "Every square is a day of showing up", heatBadge: "Last 183 days",
+          heatGridAria: "Task completion heatmap for the last 183 days",
+          monday: "Mon", wednesday: "Wed", friday: "Fri",
+          heatHint: "Hover for progress · Click to view tasks", less: "Less", more: "More",
+          todayKicker: "FOCUS ON TODAY", todayTitle: "Today", clear: "Clear Completed",
+          historyKicker: "LOOK BACK", historyTitle: "History", selectedTitle: "Tasks for this day",
+          footer: "Make a little progress, every day.",
+          progressStart: "Start with your first task", progressAll: "All tasks done for today",
+          progressRemaining: "{count} to go — keep going", taskCount: "{count} tasks",
+          emptyToday: "No tasks today. Take your first step!",
+          toggleOn: "Complete task: {text}", toggleOff: "Mark incomplete: {text}", deleteTask: "Delete task: {text}",
+          tooltip: "{date} Completed {done}/{total}", detailPlaceholder: "Click a date in the heatmap|to revisit that day",
+          detailCount: "{done}/{total} completed", detailEmpty: "No tasks were recorded that day.|A fresh start is always possible.",
+          detailSummary: "Completed {done} of {total} tasks that day",
+          loadError: "Could not read tasks for {date}. Check local storage.",
+          saveError: "Could not save. Local storage may be unavailable.",
+          languageSwitch: "Switch to Chinese"
+        }
+      };
+      const $ = (selector) => document.querySelector(selector);
+      const els = {
+        dateChip: $("#dateChip"), form: $("#taskForm"), input: $("#taskInput"),
+        languageSwitch: $("#languageSwitch"),
+        ring: $("#progressRing"), progressCount: $("#progressCount"), progressNote: $("#progressNote"),
+        taskList: $("#taskList"), taskCount: $("#taskCount"), clearDone: $("#clearDone"),
+        heatGrid: $("#heatGrid"), monthLabels: $("#monthLabels"), heatScroll: $("#heatScroll"),
+        detailPanel: $("#detailPanel"), detailTitle: $("#detailTitle"), detailCount: $("#detailCount"),
+        detailContent: $("#detailContent"), tooltip: $("#tooltip"), toast: $("#toast")
+      };
+      // 用户选择优先；首次打开才根据浏览器语言决定默认值。
+      let savedLanguage = null;
+      try { savedLanguage = localStorage.getItem("app_lang"); } catch (error) { /* 私密模式可能禁用存储。 */ }
+      let lang = savedLanguage === "zh" || savedLanguage === "en"
+        ? savedLanguage : /^zh\b/i.test(navigator.language || "") ? "zh" : "en";
+      let today = localDate(new Date());
+      let selectedDate = null;
+      let newTaskId = null;
+      let toastTimer = null;
+      let heatInitialized = false;
+      let tasks = loadTasks(today);
+
+      function t(key, values = {}) {
+        return translations[lang][key].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ""));
+      }
+      // 只更新界面文字并重绘视图，不写入任务键，因此切换语言不会丢失任务。
+      function setLanguage(nextLang, persist = true) {
+        if (!translations[nextLang]) return;
+        lang = nextLang;
+        if (persist) {
+          try { localStorage.setItem("app_lang", lang); } catch (error) { showToast(t("saveError")); }
+        }
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        document.title = lang === "zh" ? "积跬步 · JiKuiBu" : "JiKuiBu";
+        document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
+        document.querySelectorAll("[data-i18n-aria]").forEach((node) => { node.setAttribute("aria-label", t(node.dataset.i18nAria)); });
+        els.languageSwitch.textContent = lang === "zh" ? "🌐 English" : "🌐 中文";
+        els.languageSwitch.setAttribute("aria-label", t("languageSwitch"));
+        hideTooltip();
+        renderToday();
+        renderHeatmap();
+        renderDetail();
+      }
+
+      // 使用本地年月日生成 key，避免 toISOString 的 UTC 时差导致跨日存错。
+      function localDate(value) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+      }
+      function parseDate(key) {
+        const [y, m, d] = key.split("-").map(Number);
+        return new Date(y, m - 1, d, 12);
+      }
+      function dateOffset(value, days) {
+        const next = new Date(value);
+        next.setDate(next.getDate() + days);
+        return next;
+      }
+      function calendarDiff(first, second) {
+        const a = Date.UTC(first.getFullYear(), first.getMonth(), first.getDate());
+        const b = Date.UTC(second.getFullYear(), second.getMonth(), second.getDate());
+        return Math.round((b - a) / DAY_MS);
+      }
+      function storageKey(day) { return `tasks_${day}`; }
+      function loadTasks(day) {
+        try {
+          const raw = localStorage.getItem(storageKey(day));
+          if (!raw) return [];
+          const value = JSON.parse(raw);
+          if (!Array.isArray(value)) throw new Error("Invalid task data");
+          return value.filter((item) => item && typeof item.id === "string" && typeof item.text === "string" && typeof item.done === "boolean");
+        } catch (error) {
+          showToast(t("loadError", { date: day }));
+          return [];
+        }
+      }
+      function saveToday(next) {
+        try {
+          localStorage.setItem(storageKey(today), JSON.stringify(next));
+          tasks = next;
+          renderToday();
+          renderHeatmap();
+          if (selectedDate === today) renderDetail();
+          return true;
+        } catch (error) {
+          showToast(t("saveError"));
+          return false;
+        }
+      }
+      function showToast(message) {
+        if (!els.toast) return;
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => els.toast.classList.remove("show"), 3500);
+      }
+      function createId() {
+        return globalThis.crypto && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+      function friendlyDate(day) {
+        const date = parseDate(day);
+        if (lang === "zh") {
+          const weekday = new Intl.DateTimeFormat("zh-CN", { weekday: "long" }).format(date);
+          return `${day} ${weekday}`;
+        }
+        const shortDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+        const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+        return `${shortDate} ${weekday}`;
+      }
+      function progressOf(day) {
+        const list = day === today ? tasks : loadTasks(day);
+        return { list, done: list.filter((item) => item.done).length, total: list.length };
+      }
+      function heatColor(done, total) {
+        if (!total || !done) return COLORS.empty;
+        const ratio = done / total;
+        if (ratio <= .5) return COLORS.low;
+        if (ratio < 1) return COLORS.medium;
+        return COLORS.high;
+      }
+
+      function renderToday() {
+        const done = tasks.filter((task) => task.done).length;
+        const total = tasks.length;
+        const percent = total ? Math.round(done / total * 100) : 0;
+        els.dateChip.textContent = friendlyDate(today);
+        els.ring.style.setProperty("--progress", `${percent}%`);
+        els.ring.dataset.value = `${percent}%`;
+        els.progressCount.textContent = `${done} / ${total}`;
+        els.progressNote.textContent = total === 0 ? t("progressStart") : done === total ? t("progressAll") : t("progressRemaining", { count: total - done });
+        els.taskCount.textContent = t("taskCount", { count: total });
+        els.clearDone.disabled = done === 0;
+        els.taskList.replaceChildren();
+
+        if (!total) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.innerHTML = `<svg viewBox="0 0 160 135" fill="none" aria-hidden="true"><ellipse cx="80" cy="120" rx="58" ry="8" fill="#EDF1F8"/><rect x="39" y="23" width="84" height="92" rx="12" fill="#F5F7FC" stroke="#DDE5F2" stroke-width="2"/><rect x="61" y="17" width="40" height="13" rx="6.5" fill="#DDE6F8"/><path d="M56 52h13m12 0h25M56 72h13m12 0h25M56 92h13m12 0h25" stroke="#CBD5E4" stroke-width="3" stroke-linecap="round"/><circle cx="62" cy="52" r="8" fill="#DDEAFF"/><circle cx="62" cy="72" r="8" fill="#DDEAFF"/><circle cx="62" cy="92" r="8" fill="#DDEAFF"/><path d="m59 52 2 2 4-4m-6 22 2 2 4-4" stroke="#4F7CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m127 37 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#B4C8FF"/><path d="m27 72 1.5 3.5L32 77l-3.5 1.5L27 82l-1.5-3.5L22 77l3.5-1.5L27 72Z" fill="#C8D7FC"/></svg><div class="empty-title"></div>`;
+          empty.querySelector(".empty-title").textContent = t("emptyToday");
+          els.taskList.append(empty);
+          return;
+        }
+
+        // 使用 DOM API 写入任务名称，避免用户输入被当作 HTML 执行。
+        for (const task of tasks) {
+          const row = document.createElement("div");
+          row.className = `task-row${task.done ? " done" : ""}${task.id === newTaskId ? " entering" : ""}`;
+          const main = document.createElement("div");
+          main.className = "task-main";
+          const check = document.createElement("button");
+          check.type = "button";
+          check.className = "check-circle";
+          check.dataset.action = "toggle";
+          check.dataset.id = task.id;
+          check.setAttribute("aria-label", t(task.done ? "toggleOff" : "toggleOn", { text: task.text }));
+          check.setAttribute("aria-pressed", String(task.done));
+          check.innerHTML = `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3.2 3.2L13 4.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+          const text = document.createElement("span");
+          text.className = "task-text";
+          text.textContent = task.text;
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "delete-btn";
+          del.dataset.action = "delete";
+          del.dataset.id = task.id;
+          del.setAttribute("aria-label", t("deleteTask", { text: task.text }));
+          del.innerHTML = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 4h4m-8 3 1 13h10l1-13M10 11v5m4-5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+          main.append(check, text);
+          row.append(main, del);
+          els.taskList.append(row);
+        }
+        newTaskId = null;
+      }
+
+      function renderHeatmap() {
+        const oldScroll = els.heatScroll.scrollLeft;
+        els.heatGrid.replaceChildren();
+        els.monthLabels.replaceChildren();
+
+        // 最近 183 个本地自然日；从起始日所在周的周一补空格，使每列恰好是一周。
+        const end = parseDate(today);
+        const start = dateOffset(end, -(HEAT_DAYS - 1));
+        const startMonday = dateOffset(start, -((start.getDay() + 6) % 7));
+        const lastSunday = dateOffset(end, 6 - ((end.getDay() + 6) % 7));
+        const weeks = Math.floor(calendarDiff(startMonday, lastSunday) / 7) + 1;
+        els.heatGrid.style.gridTemplateColumns = `repeat(${weeks}, 13px)`;
+        els.monthLabels.style.width = `${weeks * 13 + (weeks - 1) * 5}px`;
+        const seenMonths = new Set();
+        const fragment = document.createDocumentFragment();
+
+        for (let offset = 0; offset <= calendarDiff(startMonday, lastSunday); offset++) {
+          const day = dateOffset(startMonday, offset);
+          if (day < start || day > end) {
+            const blank = document.createElement("span");
+            blank.className = "heat-blank";
+            fragment.append(blank);
+            continue;
+          }
+          const key = localDate(day);
+          const { done, total } = progressOf(key);
+          const square = document.createElement("button");
+          square.type = "button";
+          square.className = `heat-day${selectedDate === key ? " selected" : ""}`;
+          square.style.backgroundColor = heatColor(done, total);
+          square.dataset.date = key;
+          square.dataset.tip = t("tooltip", { date: key, done, total });
+          square.setAttribute("aria-label", square.dataset.tip);
+          fragment.append(square);
+
+          const monthId = `${day.getFullYear()}-${day.getMonth()}`;
+          if (!seenMonths.has(monthId)) {
+            seenMonths.add(monthId);
+            const week = Math.floor(calendarDiff(startMonday, day) / 7);
+            const label = document.createElement("span");
+            label.className = "month-label";
+            label.style.left = `${week * 18}px`;
+            label.textContent = new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", { month: "short" }).format(day);
+            els.monthLabels.append(label);
+          }
+        }
+        els.heatGrid.append(fragment);
+        if (!heatInitialized) {
+          els.heatScroll.scrollLeft = els.heatScroll.scrollWidth;
+          heatInitialized = true;
+        } else {
+          els.heatScroll.scrollLeft = oldScroll;
+        }
+      }
+
+      function renderDetail() {
+        els.detailContent.replaceChildren();
+        if (!selectedDate) {
+          els.detailTitle.textContent = t("historyTitle");
+          els.detailCount.hidden = true;
+          const placeholder = document.createElement("div");
+          placeholder.className = "detail-placeholder";
+          placeholder.innerHTML = `<div><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="7" y="9" width="34" height="32" rx="7" stroke="currentColor" stroke-width="2"/><path d="M15 6v7m18-7v7M7 18h34m-26 8h5m7 0h5m-17 8h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><p></p></div>`;
+          placeholder.querySelector("p").innerHTML = t("detailPlaceholder").split("|").join("<br>");
+          els.detailContent.append(placeholder);
+          return;
+        }
+        const { list, done, total } = progressOf(selectedDate);
+        els.detailTitle.textContent = t("selectedTitle");
+        els.detailCount.hidden = false;
+        els.detailCount.textContent = t("detailCount", { done, total });
+        const dateLine = document.createElement("div");
+        dateLine.className = "detail-date";
+        dateLine.textContent = friendlyDate(selectedDate);
+        els.detailContent.append(dateLine);
+        if (!total) {
+          const empty = document.createElement("div");
+          empty.className = "detail-placeholder";
+          empty.innerHTML = "<p></p>";
+          empty.querySelector("p").innerHTML = t("detailEmpty").split("|").join("<br>");
+          els.detailContent.append(empty);
+          return;
+        }
+        const summary = document.createElement("div");
+        summary.className = "detail-summary";
+        summary.textContent = t("detailSummary", { done, total });
+        els.detailContent.append(summary);
+        const listNode = document.createElement("div");
+        listNode.className = "history-list";
+        for (const task of list) {
+          const item = document.createElement("div");
+          item.className = `history-item${task.done ? " done" : ""}`;
+          const status = document.createElement("span");
+          status.className = "history-status";
+          status.textContent = task.done ? "✓" : "○";
+          const name = document.createElement("span");
+          name.textContent = task.text;
+          item.append(status, name);
+          listNode.append(item);
+        }
+        els.detailContent.append(listNode);
+      }
+
+      function showTooltip(event, square) {
+        els.tooltip.textContent = square.dataset.tip;
+        els.tooltip.style.display = "block";
+        moveTooltip(event, square);
+      }
+      function moveTooltip(event, square) {
+        if (els.tooltip.style.display !== "block") return;
+        const rect = square.getBoundingClientRect();
+        const x = event.clientX || rect.left + rect.width / 2;
+        const y = event.clientY || rect.bottom;
+        const width = els.tooltip.offsetWidth;
+        els.tooltip.style.left = `${Math.min(x, window.innerWidth - width - 24)}px`;
+        els.tooltip.style.top = `${Math.max(8, y)}px`;
+      }
+      function hideTooltip() { els.tooltip.style.display = "none"; }
+
+      els.form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        checkDate();
+        const text = els.input.value.trim();
+        if (!text) { els.input.focus(); return; }
+        const id = createId();
+        const next = [...tasks, { id, text, done: false, created_at: `${today} ${new Date().toTimeString().slice(0, 8)}` }];
+        newTaskId = id;
+        if (saveToday(next)) { els.input.value = ""; els.input.focus(); }
+        else newTaskId = null;
+      });
+      els.languageSwitch.addEventListener("click", () => setLanguage(lang === "zh" ? "en" : "zh"));
+      els.taskList.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        checkDate();
+        const id = button.dataset.id;
+        if (button.dataset.action === "toggle") saveToday(tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task));
+        if (button.dataset.action === "delete") saveToday(tasks.filter((task) => task.id !== id));
+      });
+      els.clearDone.addEventListener("click", () => {
+        checkDate();
+        if (tasks.some((task) => task.done)) saveToday(tasks.filter((task) => !task.done));
+      });
+      els.heatGrid.addEventListener("pointerover", (event) => {
+        const square = event.target.closest("button[data-date]");
+        if (square) showTooltip(event, square);
+      });
+      els.heatGrid.addEventListener("pointermove", (event) => {
+        const square = event.target.closest("button[data-date]");
+        if (square) moveTooltip(event, square);
+      });
+      els.heatGrid.addEventListener("pointerout", (event) => {
+        if (event.target.closest("button[data-date]")) hideTooltip();
+      });
+      els.heatGrid.addEventListener("focusin", (event) => {
+        const square = event.target.closest("button[data-date]");
+        if (square) showTooltip(event, square);
+      });
+      els.heatGrid.addEventListener("focusout", hideTooltip);
+      els.heatGrid.addEventListener("click", (event) => {
+        const square = event.target.closest("button[data-date]");
+        if (!square) return;
+        selectedDate = square.dataset.date;
+        hideTooltip();
+        renderHeatmap();
+        renderDetail();
+        if (window.innerWidth < 880) els.detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      // 页面长时间打开或电脑休眠后恢复时，自动切换到新的本地日期。
+      function checkDate() {
+        const current = localDate(new Date());
+        if (current !== today) {
+          today = current;
+          tasks = loadTasks(today);
+          renderToday();
+          renderHeatmap();
+          renderDetail();
+        }
+      }
+      setInterval(checkDate, 30000);
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) checkDate(); });
+      window.addEventListener("focus", checkDate);
+      setLanguage(lang, false);
+    })();
+  </script>
+</body>
+</html>
